@@ -2,28 +2,33 @@ library(tidyverse)
 
 set.seed(3444)
 
+
+## Create dataset ----
+
 star_is_born <- tibble(
   beauty = rnorm(2500),
   talent = rnorm(2500),
   score = beauty + talent,
-  c85 = quantile(score, .85),
-  star = ifelse(score>=c85,1,0)
+  star = ifelse(quantile(score, 0.85) >= score, 1, 0)
 )
 
-star_is_born %>% 
-  lm(beauty ~ talent, .) %>% 
-  ggplot(aes(x = talent, y = beauty)) +
-  geom_point(size = 0.5, shape=23) + xlim(-4, 4) + ylim(-4, 4)
 
-star_is_born %>% 
-  filter(star == 1) %>% 
-  lm(beauty ~ talent, .) %>% 
-  ggplot(aes(x = talent, y = beauty)) +
-  geom_point(size = 0.5, shape=23) + xlim(-4, 4) + ylim(-4, 4)
+## Plot data ----
 
-star_is_born %>% 
-  filter(star == 0) %>% 
-  lm(beauty ~ talent, .) %>% 
-  ggplot(aes(x = talent, y = beauty)) +
-  geom_point(size = 0.5, shape=23) + xlim(-4, 4) + ylim(-4, 4)
+plot_data <- function(dt) {
+  ggplot(dt, aes(x = talent, y = beauty)) +
+    geom_point(size = 0.5, shape = 23) + 
+    xlim(-4, 4) + 
+    ylim(-4, 4)
+}
 
+
+plot_data(star_is_born)
+
+star_is_born |>
+  filter(star == 1) |>
+  plot_data()
+
+star_is_born |> 
+  filter(star == 0) |>
+  plot_data()
