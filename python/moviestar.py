@@ -4,7 +4,6 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-import plotnine as p9
 
 
 # %% -- read data
@@ -12,7 +11,6 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 def read_data(file):
 	return pd.read_stata("https://github.com/scunning1975/mixtape/raw/master/" + file)
-
 
 
 # %% -- create dataset
@@ -39,22 +37,14 @@ lm_2 = sm.OLS.from_formula('beauty ~ talent * star', data=star_is_born).fit()
 print(lm_2.summary())
 
 
-# %% -- plot
-
-def plot_data(data, title = ""):
-    plot = (
-        p9.ggplot(data, p9.aes(x='talent', y='beauty')) +
-            p9.geom_point(size=0.5) +
-            p9.geom_smooth(method="lm", se=False, colour="blue") +
-            p9.xlim(-4, 4) +
-            p9.ylim(-4, 4) +
-            p9.labs(title=title)
-    )
-    return plot
+# %% -- plots
+(star_is_born
+ .plot.scatter(x='talent', y='beauty', title='All people'))
 
 # %%
-plot_data(star_is_born, "All people")
+(star_is_born[star_is_born.star == 1]
+ .plot.scatter(x='talent', y='beauty', title='Stars'))
+
 # %%
-plot_data(star_is_born[star_is_born.star == 1], "Other people")
-# %%
-plot_data(star_is_born[star_is_born.star == 0], "Stars")
+(star_is_born[star_is_born.star == 0]
+ .plot.scatter(x='talent', y='beauty', title='Other people'))
