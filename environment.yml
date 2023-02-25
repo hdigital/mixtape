@@ -1,0 +1,15 @@
+name: mixtape
+channels:
+  - conda-forge
+dependencies:
+  # Python packages
+  - black
+  - ipykernel
+  - jupyter
+  - numpy
+  - pandas
+  - plotnine
+  - statsmodels
+  # R and Tidyverse
+  - r-base
+  - r-tidyverse
