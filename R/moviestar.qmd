@@ -1,0 +1,100 @@
+---
+title: "Collider bias"
+date: "2023-02-25"
+execute:
+  # messages: false
+  warning: false
+format:
+  html:
+    code-fold: true
+    embed-resources: true
+    toc: true
+---
+
+```{r}
+library(broom)      # models // tidy results
+library(ggeffects)  # models // visualize model effects
+library(patchwork)  # plots  // arrange
+
+library(knitr)      # layout // tables in RMarkdown with kable()
+library(tidyverse)  # —      // load last to avoid masking
+
+set.seed(3444)
+```
+
+[Discrimination and collider bias](https://mixtape.scunning.com/03-directed_acyclical_graphs#discrimination-and-collider-bias)
+
+Create dataset
+
++ 2500 independent draws from standard normal distribution
++ collider variable _star_
+
+```{r}
+star_is_born <- tibble(
+  beauty = rnorm(2500),
+  talent = rnorm(2500),
+  score = beauty + talent,
+  star = ifelse(score >= quantile(score, .85), 1, 0)
+)
+```
+
+
+## Plot data
+
+
+```{r}
+plot_dt <- function(dt, plot_title = "") {
+  dt |>
+    ggplot(aes(x = talent, y = beauty)) +
+    geom_point(size = 0.5, shape=23) +
+    geom_smooth(method='lm', formula= y~x, se = FALSE) +
+    xlim(-4, 4) +
+    ylim(-4, 4) +
+    labs(title = plot_title)
+}
+
+pl_all <- plot_dt(star_is_born, "All people")
+pl_stars <- plot_dt(star_is_born |> filter(star == 1), "Stars")
+pl_others <- plot_dt(star_is_born |> filter(star == 0), "Normal people")
+
+pl_others + pl_stars + pl_all + plot_layout(ncol = 2)
+
+```
+
+## Linear models
+
+
+```{r}
+plot_effects <- function(model_object, terms, title = "") {
+  ggpredict(model_object, terms = terms) |>
+  plot(show.title = FALSE) +
+  xlim(-4, 4) +
+  ylim(-2, 5) +
+  labs(title = title)
+}
+```
+
+
+### Model for all people
+
+```{r}
+m1 <- lm(beauty ~ talent, star_is_born)
+
+tidy(m1) |> kable(digits = 2)
+glance(m1) |> kable(digits = 2)
+
+pl_m1 <- plot_effects(m1, terms = "talent", "All people")
+```
+
+### Interaction model for stars and others
+
+```{r}
+m2 <- lm(beauty ~ talent * star, star_is_born)
+
+tidy(m2) |> kable(digits = 2)
+glance(m2) |> kable(digits = 2)
+
+pl_m2 <- plot_effects(m2, c("talent", "star"), "Stars and normal people")
+
+pl_m1 + pl_m2
+```
