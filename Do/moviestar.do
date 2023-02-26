@@ -7,9 +7,9 @@ generate beauty=rnormal()
 generate talent=rnormal() 
 
 * Creating the collider variable (star) 
-gen score=(beauty+talent) 
+generate score=(beauty+talent) 
 egen c85=pctile(score), p(85)   
-gen star=(score>=c85) 
+generate star=(score>=c85) 
 label variable star "Movie star" 
 
 * Conditioning on the top 15\% 
